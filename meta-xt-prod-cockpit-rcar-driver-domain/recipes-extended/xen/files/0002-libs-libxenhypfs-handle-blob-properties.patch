@@ -1,0 +1,31 @@
+From c854a40bad8fe45eb2c6edaac0e4e1f138963383 Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor_usyk@epam.com>
+Date: Tue, 22 Nov 2022 19:01:47 +0100
+Subject: [PATCH 2/8] libs: libxenhypfs - handle blob properties
+
+libxenhypfs will return blob properties as is. This output can be used
+to retrieve information from the hypfs. Caller is responsible for
+parsing property value.
+
+Signed-off-by: Oleksii Moisieiev <oleksii_moisieiev@epam.com>
+---
+ tools/libs/hypfs/core.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/tools/libs/hypfs/core.c b/tools/libs/hypfs/core.c
+index 52b30db8d7..e1639eb0be 100644
+--- a/tools/libs/hypfs/core.c
++++ b/tools/libs/hypfs/core.c
+@@ -306,9 +306,6 @@ char *xenhypfs_read(xenhypfs_handle *fshdl, const char *path)
+     case xenhypfs_type_dir:
+         errno = EISDIR;
+         break;
+-    case xenhypfs_type_blob:
+-        errno = EDOM;
+-        break;
+     case xenhypfs_type_string:
+         ret_buf = buf;
+         buf = NULL;
+-- 
+2.25.1
+

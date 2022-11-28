@@ -1,0 +1,27 @@
+From fc3ca904eb8304fe314095f7ede5a289d7a51dfd Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor_usyk@epam.com>
+Date: Tue, 29 Nov 2022 13:58:02 +0100
+Subject: [PATCH] domain_build.c: add DT node to SCI.
+
+Signed-off-by: Ihor Usyk <ihor_usyk@epam.com>
+---
+ xen/arch/arm/domain_build.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/xen/arch/arm/domain_build.c b/xen/arch/arm/domain_build.c
+index d3c627f3a1..4125ec5def 100644
+--- a/xen/arch/arm/domain_build.c
++++ b/xen/arch/arm/domain_build.c
+@@ -1387,6 +1387,9 @@ static int __init handle_device(struct domain *d, struct dt_device_node *dev,
+                 return res;
+             }
+         }
++	res = sci_add_dt_device(d, dev);
++        if ( res < 0 )
++            return res;
+     }
+ 
+     res = handle_device_interrupts(d, dev, need_mapping);
+-- 
+2.25.1
+
