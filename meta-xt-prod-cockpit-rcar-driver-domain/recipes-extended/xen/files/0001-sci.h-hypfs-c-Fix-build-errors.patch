@@ -1,0 +1,72 @@
+From b2018cdd16dbd073ce2b8f506bc3cf945451eed4 Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor_usyk@epam.com>
+Date: Mon, 28 Nov 2022 16:52:54 +0100
+Subject: [PATCH] sci.h, hypfs,c:Fix build errors
+
+The patch has the fix of the following errors
+ hypfs.c: In function 'hypfs_read_dyndir_entry':
+| hypfs.c:378:10: error: 'name' redeclared as different kind of symbol
+|   378 |     char name[HYPFS_DYNDIR_ID_NAMELEN];
+|       |          ^~~~
+| hypfs.c:373:44: note: previous definition of 'name' was here
+|   373 |                                const char *name, unsigned int namelen,
+|       |                                ~~~~~~~~~~~~^~~~
+| hypfs.c:381:54: error: 'const struct hypfs_entry' has no member named 'e'
+|   381 |     e_namelen = snprintf(name, sizeof(name), template->e.name, id);
+|       |                                                      ^~
+| hypfs.c:381:64: error: 'id' undeclared (first use in this function)
+|   381 |     e_namelen = snprintf(name, sizeof(name), template->e.name, id);
+
+Signed-off-by: Ihor Usyk <ihor_usyk@epam.com>
+---
+ xen/common/hypfs.c            | 6 ++----
+ xen/include/asm-arm/sci/sci.h | 3 ++-
+ 2 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/xen/common/hypfs.c b/xen/common/hypfs.c
+index 590e2843e0..dd69e49cd3 100644
+--- a/xen/common/hypfs.c
++++ b/xen/common/hypfs.c
+@@ -375,10 +375,8 @@ int hypfs_read_dyndir_entry(const struct hypfs_entry *template,
+                                XEN_GUEST_HANDLE_PARAM(void) *uaddr)
+ {
+     struct xen_hypfs_dirlistentry direntry;
+-    char name[HYPFS_DYNDIR_ID_NAMELEN];
+-    unsigned int e_namelen, e_len;
++    unsigned int e_len;
+ 
+-    e_namelen = snprintf(name, sizeof(name), template->e.name, id);
+     e_len = DIRENTRY_SIZE(namelen);
+     direntry.e.pad = 0;
+     direntry.e.type = template->type;
+@@ -389,7 +387,7 @@ int hypfs_read_dyndir_entry(const struct hypfs_entry *template,
+     if ( copy_to_guest(*uaddr, &direntry, 1) )
+         return -EFAULT;
+     if ( copy_to_guest_offset(*uaddr, DIRENTRY_NAME_OFF, name,
+-                              e_namelen + 1) )
++                              namelen + 1) )
+         return -EFAULT;
+ 
+     guest_handle_add_offset(*uaddr, e_len);
+diff --git a/xen/include/asm-arm/sci/sci.h b/xen/include/asm-arm/sci/sci.h
+index f719703270..2c7b1783ed 100644
+--- a/xen/include/asm-arm/sci/sci.h
++++ b/xen/include/asm-arm/sci/sci.h
+@@ -24,6 +24,7 @@
+ #include <xen/types.h>
+ #include <xen/device_tree.h>
+ #include <public/domctl.h>
++#include <xen/errno.h>
+ 
+ #ifdef CONFIG_ARM_SCI
+ 
+@@ -159,4 +160,4 @@ static inline int sci_do_domctl(
+  * c-basic-offset: 4
+  * indent-tabs-mode: nil
+  * End:
+- */
+\ No newline at end of file
++ */
+-- 
+2.25.1
+
