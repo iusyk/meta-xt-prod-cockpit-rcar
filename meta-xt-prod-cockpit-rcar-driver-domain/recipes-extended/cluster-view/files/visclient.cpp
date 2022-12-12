@@ -176,6 +176,16 @@ void VisClient::onTextMessageReceived(const QString &message)
              {
                 qDebug() << "No RPM value in the message";
              }
+             value = getBattery(message);
+             qDebug() << " getBattery " << value;
+             if(value != not_defined_value)
+             {
+                 setBatteryValue(value);
+             }
+             else
+             {
+                qDebug() << "No Battery value in the message";
+             }
         }
         else
         {
@@ -219,9 +229,22 @@ VisClient::GearPosition VisClient::getGearSelect(const QString & message)const
     return res;
 }
 
+int VisClient::getBattery(const QString & message)const
+{
+    int res = not_defined_value;
+    QByteArray br = message.toUtf8();
+    QJsonDocument doc = QJsonDocument::fromJson(br);
+
+    if(doc["value"].isObject() && !doc["value"].isUndefined())
+    {
+        res = doc["value"]["Signal.Drivetrain.BatteryManagement.BatteryCapacity"].toInt();
+    }
+    return res;
+}
+
 int VisClient::getRpm(const QString & message)const
 {
-    return getValue("Signal.Drivetrain.InternalCombustionEngine.Engine.Speed", message);
+    return getValue("Signal.Drivetrain.BatteryManagement.BatteryCapacity", message);
 }
 
 QString VisClient::getStringValue(const QString & propId, const QString & message)const
@@ -334,4 +357,15 @@ void VisClient::setConnectedValue(bool connected)
         return;
     this->isConnected = connected;
     emit connectedValueChanged();
+}
+void VisClient::setBatteryValue(int level)
+{
+    if(this->battery == level)
+        return;
+    this->battery = level;
+    emit batteryValueChanged();
+}
+int VisClient::batteryValue()const
+{
+    return battery;
 }

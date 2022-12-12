@@ -124,8 +124,8 @@ Window {
 
         PowerChargeInfo {
             id: powerChargeInfo
-            powerValue: 100
-            chargeValue: 100
+            powerValue: vis,batterValue
+            chargeValue: vis,batterValue//100
             visible: cmdLine.getMode() == 2
         }
 

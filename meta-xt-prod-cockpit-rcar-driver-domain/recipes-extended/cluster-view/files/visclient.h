@@ -12,6 +12,7 @@
 class VisClient: public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int batteryValue READ batteryValue WRITE setBatteryValue NOTIFY batteryValueChanged)
     Q_PROPERTY(int speedValue READ speedValue WRITE setSpeedValue NOTIFY speedValueChanged)
     Q_PROPERTY(int rpmValue READ rpmValue WRITE setRpmValue NOTIFY rpmValueChanged)
     Q_PROPERTY(int gearValue READ gearValue WRITE setGearValue NOTIFY gearValueChanged)
@@ -29,6 +30,9 @@ public:
 
     explicit VisClient(QObject *parent = nullptr);
     ~VisClient();
+
+    int batteryValue()const;
+    void setBatteryValue(int battery);
 
     int speedValue()const;
     void setSpeedValue(int speed);
@@ -65,6 +69,7 @@ private Q_SLOTS:
     void onTextMessageReceived(const QString &message);
 
 signals:
+    void batteryValueChanged();
     void speedValueChanged();
     void rpmValueChanged();
     void gearValueChanged();
@@ -85,8 +90,10 @@ private: // methods
     int getRpm(const QString & message)const;
     int getValue(const QString & propId, const QString & message)const;
     QString getStringValue(const QString & propId, const QString & message)const;
+    int getBattery(const QString & message)const;
 
 private:
+    int battery;
     int speed;
     int rpm;
     int gear;
