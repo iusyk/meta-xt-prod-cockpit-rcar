@@ -1,0 +1,24 @@
+From 6c5bb793468367bf211be6f0ac8402768a820639 Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor_usyk@epam.com>
+Date: Wed, 14 Dec 2022 14:28:10 +0100
+Subject: [PATCH] xt_defconfig: activate HOST_DTB_EXPORT
+
+The feature CONFIG_SCMI_SMC depends on HOST_DTB_EXPORT
+
+Signed-off-by: Ihor Usyk <ihor_usyk@epam.com>
+---
+ xen/arch/arm/configs/xt_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/xen/arch/arm/configs/xt_defconfig b/xen/arch/arm/configs/xt_defconfig
+index 99f7432355..88e7a5ed69 100644
+--- a/xen/arch/arm/configs/xt_defconfig
++++ b/xen/arch/arm/configs/xt_defconfig
+@@ -6,3 +6,4 @@ CONFIG_IOREQ_SERVER=y
+ CONFIG_EXPERT=y
+ CONFIG_ARM_SCI=y
+ CONFIG_SCMI_SMC=y
++CONFIG_HOST_DTB_EXPORT=y
+-- 
+2.25.1
+

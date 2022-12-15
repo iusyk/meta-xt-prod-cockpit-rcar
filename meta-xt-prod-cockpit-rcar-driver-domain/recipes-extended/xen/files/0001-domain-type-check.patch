@@ -1,0 +1,25 @@
+From f3a32ba710abb47219f4b29b5e73decc1202408f Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor.usyk@gmail.com>
+Date: Tue, 13 Dec 2022 18:50:58 +0100
+Subject: [PATCH] domain type check
+
+---
+ xen/arch/arm/domain.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xen/arch/arm/domain.c b/xen/arch/arm/domain.c
+index d9d3ec3620..e0d40aeb04 100644
+--- a/xen/arch/arm/domain.c
++++ b/xen/arch/arm/domain.c
+@@ -685,7 +685,7 @@ int arch_sanitise_domain_config(struct xen_domctl_createdomain *config)
+     if ( config->arch.arm_sci_type != XEN_DOMCTL_CONFIG_ARM_SCI_NONE &&
+          config->arch.arm_sci_type != sci_get_type() )
+     {
+-        dprintk(XENLOG_INFO, "Unsupported ARM_SCI type\n");
++        dprintk(XENLOG_INFO, "Unsupported ARM_SCI type config %d sci_get %d NONE %d\n", config->arch.arm_sci_type, sci_get_type(), XEN_DOMCTL_CONFIG_ARM_SCI_NONE);
+         return -EINVAL;
+     }
+ 
+-- 
+2.25.1
+
