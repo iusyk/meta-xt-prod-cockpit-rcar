@@ -1,0 +1,77 @@
+From e6d1c83b7fabb16a08e013c2e1080adc68141024 Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor.usyk@gmail.com>
+Date: Wed, 16 Nov 2022 20:59:13 +0100
+Subject: [PATCH] rcar3 debug
+
+---
+ xen/arch/arm/platforms/rcar3.c | 41 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 41 insertions(+)
+
+diff --git a/xen/arch/arm/platforms/rcar3.c b/xen/arch/arm/platforms/rcar3.c
+index 4b1136c266..3c9836a010 100644
+--- a/xen/arch/arm/platforms/rcar3.c
++++ b/xen/arch/arm/platforms/rcar3.c
+@@ -55,6 +55,39 @@
+ 
+ #define RPROC_SMC_ERR_NOT_AVAILABLE      0x01
+ 
++/*
++ * The set of macroses to set the information about the operation 
++ * made with domain. The information is necessary to inform the cluster_wrapper
++ * about the domain status
++ * The bits from 0-3 are to save the domain ID
++ * The bits from 30-31 are to save the command
++ * Bit 30 value 1 - domain is removed
++ * Bit 31 value 1 - domain is created
++ * */
++#define SET_BIT(v,n) v |= 1UL << n
++#define IS_BIT_SET(v,n) (v >> n) & 1U
++#define RESET_BIT(v,n) v ^= 1UL << n;
++
++#define NO_OPERATION(v) (!(IS_BIT_SET(v,30)) && !(IS_BIT_SET(v,31))) 
++
++#define SET_DOMAIN_CREATE(v) SET_BIT(v,31)
++#define SET_DOMAIN_REMOVE(v) SET_BIT(v,30)
++
++#define RESET_DOMAIN_CREATE(v) RESET_BIT(v,31)
++#define RESET_DOMAIN_REMOVE(v) RESET_BIT(v,30)
++
++#define SET_DOMD(v) SET_BIT(v,0)
++#define SET_DOMA(v) SET_BIT(v,1)                                                                    
++
++#define RESET_DOMD(v) RESET_BIT(v,0)
++#define RESET_DOMA(v) RESET_BIT(v,1)
++
++#define IS_DOMD_SET(v) IS_BIT_SET(v,0)
++#define IS_DOMA_SET(v) IS_BIT_SET(v,1)
++
++#define IS_DOMAIN_CREATE(v) IS_BIT_SET(v,31)
++#define IS_DOMAIN_REMOVE(v) IS_BIT_SET(v,30)
++
+ struct mfis_data
+ {
+     void *base;
+@@ -177,12 +210,20 @@ static int mfis_add_domain(struct domain* d, int chan)
+ 
+ static int mfis_remove_domain(int chan)
+ {
++    uint32_t msg = 0x0;
+ 
+     if ( chan >= mfis_data->chan_cnt )
+         return -EINVAL;
+ 
+     mfis_data->domains[chan] = NULL;
+ 
++    SET_DOMAIN_REMOVE(msg);
++    msg |= (chan + 1);
++
++    printk("Fire remove domain %d\n", (chan+1));
++    writel(msg, mfis_data->base + MFIS_IMBR(7));
++    writel(0x1, mfis_data->base + MFIS_IICR(7));//(chan + 2)));
++
+     return 0;
+ }
+ 
+-- 
+2.25.1
+

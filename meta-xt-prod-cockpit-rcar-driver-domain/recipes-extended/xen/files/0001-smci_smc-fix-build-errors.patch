@@ -1,0 +1,90 @@
+From 79603b03b34bf9d0dd0dc72b08c8b2eb414a2cdb Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor_usyk@epam.com>
+Date: Wed, 14 Dec 2022 17:32:33 +0100
+Subject: [PATCH] smci_smc: fix build errors
+
+This patch nneds to be merged in  0005
+dt_find_node_by_phandle - function is moved in public
+area, need to be investigated to be sure that it is right.
+
+Signed-off-by: Ihor Usyk <ihor_usyk@epam.com>
+---
+ xen/arch/arm/sci/scmi_smc.c   | 8 ++++----
+ xen/common/device_tree.c      | 2 +-
+ xen/include/xen/device_tree.h | 8 ++++++++
+ 3 files changed, 13 insertions(+), 5 deletions(-)
+
+diff --git a/xen/arch/arm/sci/scmi_smc.c b/xen/arch/arm/sci/scmi_smc.c
+index dfbb14cf4d..ce5451df54 100644
+--- a/xen/arch/arm/sci/scmi_smc.c
++++ b/xen/arch/arm/sci/scmi_smc.c
+@@ -170,7 +170,7 @@ void __memcpy_fromio(void *to, const volatile void __iomem *from, size_t count)
+ 
+     while (count >= 4) {
+         *(u32 *)to = __raw_readl(from);
+-        from = 4;
++        from = (const volatile void __iomem *)4;
+         to += 4;
+         count -= 4;
+     }
+@@ -236,7 +236,7 @@ static int send_smc_message(struct scmi_channel *chan_info,
+     chan_info->shmem->channel_status = 0x0;
+     /* Writing 0x0 right now, but SCMI_SHMEM_FLAG_INTR_ENABLED can be set */
+     chan_info->shmem->flags = 0x0;
+-    chan_info->shmem->length = sizeof(chan_info->shmem->msg_header)  len;
++    chan_info->shmem->length = sizeof(chan_info->shmem->msg_header) + len;
+     chan_info->shmem->msg_header = pack_scmi_header(hdr);
+ 
+     printk(XENLOG_DEBUG "scmi: Writing to shmem address %p\n",
+@@ -461,14 +461,14 @@ static struct scmi_channel *smc_create_channel(uint8_t chan_id,
+ static int mem_permit_access(struct domain *d, uint64_t addr, uint64_t len)
+ {
+     return iomem_permit_access(d, paddr_to_pfn(addr),
+-                paddr_to_pfn(PAGE_ALIGN(addr  len -1)));
++                paddr_to_pfn(PAGE_ALIGN(addr + len -1)));
+ }
+ 
+ static int mem_deny_access(struct domain *d, uint64_t addr,
+                                      uint64_t len)
+ {
+     return iomem_deny_access(d, paddr_to_pfn(addr),
+-                paddr_to_pfn(PAGE_ALIGN(addr  len -1)));
++                paddr_to_pfn(PAGE_ALIGN(addr + len -1)));
+ }
+ 
+ static int dt_update_domain_range(uint64_t addr, uint64_t size)
+diff --git a/xen/common/device_tree.c b/xen/common/device_tree.c
+index 03d25a81ce..c2e33b9983 100644
+--- a/xen/common/device_tree.c
++++ b/xen/common/device_tree.c
+@@ -986,7 +986,7 @@ int dt_for_each_range(const struct dt_device_node *dev,
+  *
+  * Returns a node pointer.
+  */
+-static struct dt_device_node *dt_find_node_by_phandle(dt_phandle handle)
++struct dt_device_node *dt_find_node_by_phandle(dt_phandle handle)
+ {
+     struct dt_device_node *np;
+ 
+diff --git a/xen/include/xen/device_tree.h b/xen/include/xen/device_tree.h
+index b02696be94..40b6fd30b7 100644
+--- a/xen/include/xen/device_tree.h
++++ b/xen/include/xen/device_tree.h
+@@ -776,6 +776,14 @@ int dt_count_phandle_with_args(const struct dt_device_node *np,
+                                const char *list_name,
+                                const char *cells_name);
+ 
++/**
++ * dt_find_node_by_phandle - Find a node given a phandle
++ * @handle: phandle of the node to find
++ *
++ * Returns a node pointer.
++ */
++struct dt_device_node *dt_find_node_by_phandle(dt_phandle handle);
++
+ #ifdef CONFIG_DEVICE_TREE_DEBUG
+ #define dt_dprintk(fmt, args...)  \
+     printk(XENLOG_DEBUG fmt, ## args)
+-- 
+2.25.1
+

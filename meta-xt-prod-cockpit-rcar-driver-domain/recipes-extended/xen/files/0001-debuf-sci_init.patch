@@ -1,0 +1,28 @@
+From aa4175464cf5976188d675119a1b50e18c0f81fa Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor.usyk@gmail.com>
+Date: Tue, 13 Dec 2022 19:08:43 +0100
+Subject: [PATCH] debuf sci_init
+
+---
+ xen/arch/arm/sci/sci.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/xen/arch/arm/sci/sci.c b/xen/arch/arm/sci/sci.c
+index c4a7bd9511..231e02e461 100644
+--- a/xen/arch/arm/sci/sci.c
++++ b/xen/arch/arm/sci/sci.c
+@@ -119,9 +119,10 @@ static int __init sci_init(void)
+     const struct sci_mediator_desc *desc;
+     struct dt_device_node *dt = NULL;
+ 
+-
++    printk("SCI_INIT !!!\n");
+     for ( desc = _sscimediator; desc != _escimediator; desc++ )
+     {
++        printk("SCI_INIT, desc name %s , acpi_disabled %d\n", desc->name, (int)acpi_disabled);
+         if ( acpi_disabled )
+         {
+             dt = dt_find_matching_node(dt_host, desc->dt_match);
+-- 
+2.25.1
+

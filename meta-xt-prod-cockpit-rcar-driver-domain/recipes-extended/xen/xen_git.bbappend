@@ -12,4 +12,10 @@ SRC_URI_append = " \
     file://0008-xen-arm-add-SCI-mediator-support-for-DomUs.patch \
     file://0001-sci.h-hypfs-c-Fix-build-errors.patch \
     file://0001-domain_build.c-add-DT-node-to-SCI.patch \
+    file://0001-domain-type-check.patch \
+    file://0001-debuf-sci_init.patch \
+    file://0001-xt_config-activate-CONFIG_ARM_SCI.patch \
+    file://0001-xt_defconfig-activate-CONFIG_SCMI_SMC.patch \
+    file://0001-xt_defconfig-activate-HOST_DTB_EXPORT.patch \
+    file://0001-smci_smc-fix-build-errors.patch \
 "
