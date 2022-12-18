@@ -1,0 +1,55 @@
+From 50ee9a3326957291d353944e01cbf02bdfa6c461 Mon Sep 17 00:00:00 2001
+From: Ihor Usyk <ihor_usyk@epam.com>
+Date: Fri, 16 Dec 2022 18:48:47 +0100
+Subject: [PATCH] device-tree: Introduce scmi nodes to work with clocks and 
+ resets via scmi
+
+Add separate file with the description of the scmi nodes.
+Update dt nodes by setting clocks, resets and power-domains to
+be operated through scmi.
+Changes were done:
+ + Add firmware/scmi node with the description of
+ clock/reset/power-domain subnodes;
+ * Set the following devices to be operated via scmi:
+    - avb (ethernet);
+    - hdmi0;
+    - i2c2, i2c4;
+    - usb_dmac{0,1,2,3};
+    - hsusb
+    - xhci, ehci, ohci devices;
+    - audma{0,1};
+    - rcar_sound;
+
+Signed-off-by: Oleksii Moisieiev <oleksii_moisieiev@epam.com>
+Signed-off-by: Sergiy Kibrik <Sergiy_Kibrik@epam.com>
+---
+ arch/arm64/boot/dts/renesas/r8a77951-scmi.dtsi | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/renesas/r8a77951-scmi.dtsi b/arch/arm64/boot/dts/renesas/r8a77951-scmi.dtsi
+index 00e22e694..83e4d9f2e 100644
+--- a/arch/arm64/boot/dts/renesas/r8a77951-scmi.dtsi
++++ b/arch/arm64/boot/dts/renesas/r8a77951-scmi.dtsi
+@@ -13,6 +13,19 @@
+ 		compatible = "arm,scmi-shmem";
+ 		reg = <0x0 0x53FF0000 0x0 0x1000>;
+ 	};
++	scp-shmem@0x53FF1000 {
++		compatible = "arm,scmi-shmem";
++		reg = <0x00 0x53ff1000 0x00 0x1000>;
++	};
++	scp-shmem@0x53FF2000 {
++		compatible = "arm,scmi-shmem";
++		reg = <0x00 0x53ff2000 0x00 0x1000>;
++	};
++	scp-shmem@0x53FF3000 {
++		compatible = "arm,scmi-shmem";
++		reg = <0x00 0x53ff3000 0x00 0x1000>;
++		phandle = <0x19>;
++	};
+ 
+ 	firmware {
+ 		scmi {
+-- 
+2.25.1
+

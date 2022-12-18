@@ -23,7 +23,7 @@ index dfbb14cf4d..ce5451df54 100644
      while (count >= 4) {
          *(u32 *)to = __raw_readl(from);
 -        from = 4;
-+        from = (const volatile void __iomem *)4;
++        from += 4;
          to += 4;
          count -= 4;
      }

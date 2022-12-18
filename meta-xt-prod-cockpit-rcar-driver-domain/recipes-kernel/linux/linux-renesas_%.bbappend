@@ -11,4 +11,7 @@ SRC_URI_append = " \
     file://0001-PM-clk-make-PM-clock-layer-compatible-with-clocks-th.patch \
     file://0002-firmware-arm_scmi-Add-clock-management-to-the-SCMI-p.patch \
     file://0003-device-tree-Introduce-scmi-nodes-to-work-with-clocks.patch \
+    file://0001-device-tree-Introduce-scmi-nodes-to-work-with-clocks.patch \
 "
+#    file://0003-device-tree-Introduce-scmi-nodes-to-work-with-clocks.patch 
+
