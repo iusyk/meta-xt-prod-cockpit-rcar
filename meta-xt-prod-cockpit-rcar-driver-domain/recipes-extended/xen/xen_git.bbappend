@@ -2,6 +2,7 @@ FILESEXTRAPATHS_append := "${THISDIR}/files:"
 
 SRC_URI_append = " \
     file://0001-xen-HACK-disable-warning-delay.patch \
+    file://0001-rcar3-debug.patch \
     file://0001-xen-hypfs-support-fo-nested-dynamic-hypfs-nodes.patch \
     file://0002-libs-libxenhypfs-handle-blob-properties.patch \
     file://0003-xen-arm-Export-host-device-tree-to-hypfs.patch \
