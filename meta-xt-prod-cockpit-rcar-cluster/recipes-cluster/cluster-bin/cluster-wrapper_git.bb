@@ -14,7 +14,7 @@ SRC_URI = " \
    git://git@gitpct.epam.com/epmd-aepr/vlib;protocol=ssh;branch=CES-2023 \
 "
 
-SRCREV = "${AUTOREV}"
+SRCREV = "26313f18f8b78c4ac7d9945434fd39d4e8f8b436"
 
 DEPENDS = " \
     cluster-wrapper-toolchain-native \
