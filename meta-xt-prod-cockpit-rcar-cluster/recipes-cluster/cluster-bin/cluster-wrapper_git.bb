@@ -1,3 +1,4 @@
+FILESEXTRAPATHS_append := "${THISDIR}/files:"
 
 SUMMARY = "Compilation of cluster_wrapper.bin to flash cr7"
 DESCRIPTION = "build of cluster_bin"
@@ -11,8 +12,10 @@ PLATFORM = "rcar"
 PARALLEL_MAKE = ""
 
 SRC_URI = " \
-   git://git@gitpct.epam.com/epmd-aepr/vlib;protocol=ssh;branch=CES-2023 \
+   git://git@gitpct.epam.com/epmd-aepr/vlib;protocol=ssh;branch=master \
+   file://${@bb.utils.contains('CLUSTER_HDMI', '1', '0001-Support-of-HDMI-1920x1080.patch', '', d)} \
 "
+S = "${WORKDIR}/git/"
 
 SRCREV = "${AUTOREV}"
 

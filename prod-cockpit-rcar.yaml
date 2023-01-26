@@ -527,3 +527,21 @@ parameters:
             builder:
               additional_deps:
                 - "%{CLUSTER_BUILD_DIR}/tmp/deploy/fsgen"
+
+  DISPLAY:
+    desc: "Build for HDMI display, default is LVDS"
+    "lvds":
+      default: true
+      overrides:
+        variables:
+          XT_DOMD_DTB_NAME: "r8a77951-h3ulcb-4x2g-kf-domd.dtb"      
+    "hdmi":
+      overrides:
+        variables:
+          XT_DOMD_DTB_NAME: "r8a77951-h3ulcb-4x2g-kf-hdmi-domd.dtb"
+        components:
+          cluster:
+            builder:
+              conf:
+                # set activation of HDMI build
+                - [CLUSTER_HDMI, "1"]
