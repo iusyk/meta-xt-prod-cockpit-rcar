@@ -68,7 +68,6 @@
                                 };
                         };
 			display-1 {
-				display-map = <0>;
 				layers {
 					primary {
 						layer-map=<0x4>;
