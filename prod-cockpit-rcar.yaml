@@ -10,11 +10,14 @@ variables:
   ANDROID_KERNEL_DIR: "android_kernel"
   XT_DOMD_DTB_NAME: "%{SOC_FAMILY}-%{MACHINE}-domd.dtb"
   XT_XEN_DTB_NAME: "%{SOC_FAMILY}-%{MACHINE}-xen.dtb"
-  XT_XEN_REVISION: "995f0fcf697d8d8690ed02e0990b2be074ebe8cb"
+  XT_XEN_REVISION: "e43b76f60b3f6512e78359db187f3bac9de0791f"
   XT_PVR_NUM_OSID: "2"
   XT_OP_TEE_FLAVOUR: "generic_dt"
   XT_DOMA_TAG: ""
   XEN_URL: "git://git@gitpct.epam.com/rec-inv/xen.git;protocol=ssh;branch=v4.16rc_cr7"
+  XT_DOMD_CFG: "domd-h3ulcb-4x2g-kf.cfg"
+  XT_DOMA_CFG: "doma-h3ulcb-4x2g-kf.cfg"
+  XT_PREBUILT_GSX_DIR: ""
 
 common_data:
   # Sources used by all yocto-based domains
@@ -54,6 +57,7 @@ common_data:
 
     # Remove features that we are not using
     - [DISTRO_FEATURES_remove, "x11 gtk gobject-introspection-data wifi nfc bluetooth irda zeroconf 3g sysvinit"]
+    - [DISTRO_FEATURES_append, " pvcamera"]
 
   # Conf options for domain that are built used renesas layer
   domd_domu_conf: &DOMD_DOMU_CONF
@@ -216,6 +220,9 @@ components:
         - [PREFERRED_PROVIDER_libgbm-dev, "libgbm"]
         - [BBMASK_append, "mesa-gl"]
         - [BBMASK_append, "|meta-xt-domx/recipes-core/base-files"]
+        # setup the domains config files
+        - [XT_DOMD_CFG, "%{XT_DOMD_CFG}]
+        - [XT_DOMA_CFG, "%{XT_DOMA_CFG}]
 
       build_target: core-image-minimal
       layers:
@@ -277,7 +284,7 @@ components:
     sources:
       - type: repo
         url: "ssh://git@gitpct.epam.com/rec-inv/android_manifest.git"
-        rev: android-12-master
+        rev: android-12-master-evs
         manifest: doma.xml
         depth: 1
         groups: all
@@ -419,6 +426,20 @@ parameters:
         components:
           domd:
             *DDK_SOURCE_OVERRIDES
+    "yes":
+      # Folder with prebuilt graphics package, i.e. file ${SOC_NAME}_linux_gsx_binaries_gles.tar.gz
+      # is provided as XT_PREBUILT_GSX_DIR variable to components
+      default: false
+      overrides:
+        variables:
+          XT_PREBUILT_GSX_DIR: "${TOPDIR}/../../prebuilt_gsx"
+        components:
+          domd:
+            builder:
+              conf:
+                - [XT_PREBUILT_GSX_DIR, "%{XT_PREBUILT_GSX_DIR}"]
+                - [FILESEXTRAPATHS_prepend_pn-gles-user-module, "%{XT_PREBUILT_GSX_DIR}:"]
+                - [FILESEXTRAPATHS_prepend_pn-kernel-module-gles, "%{XT_PREBUILT_GSX_DIR}:"]
 
   ENABLE_MM:
     desc: "Enable Multimedia support"
@@ -542,3 +563,15 @@ parameters:
         variables:
           XT_DOMD_DTB_NAME: "r8a77951-h3ulcb-4x2g-kf-hdmi-domd.dtb"
           XT_DOMA_DTB_NAME: "r8a7795-h3ulcb-4x2g-kf-hdmi-doma.dtb"
+  
+  ENABLE_CAMERA:
+    desc: "Support the camera functionality"
+    "no":
+      default: true
+    "yes":
+      overrides:
+        components:
+          variables:
+              XT_DOMD_CFG: "domd-h3ulcb-4x2g-camera-kf.cfg"
+              XT_DOMA_CFG: "doma-h3ulcb-4x2g-camera-kf.cfg"
+
