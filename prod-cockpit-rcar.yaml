@@ -14,7 +14,7 @@ variables:
   XT_PVR_NUM_OSID: "2"
   XT_OP_TEE_FLAVOUR: "generic_dt"
   XT_DOMA_TAG: ""
-  XEN_URL: "git://git@gitpct.epam.com/rec-inv/xen.git;protocol=ssh;branch=v4.16rc_cr7"
+  XEN_URL: "git://git@gitpct.epam.com/rec-inv/xen.git;protocol=ssh;branch=support-scmi"
   XT_PREBUILT_GSX_DIR: ""
   XT_DOMA_DDK_KM_PREBUILT_MODULE: ""
   XT_DOMA_SOURCE_GROUP: ""  
