@@ -5,7 +5,10 @@ SRC_URI = "file://vis-service.pro \
            file://main.cpp \
            file://VisClient.h \
            file://VisClient.cpp \
+	   file://VisServiceClient.h \
            file://vis-service.service \
+	   file://providers/* \
+	   file://devices/* \
 "
 
 DEPENDS += " \

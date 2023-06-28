@@ -20,12 +20,13 @@
 #include <limits>
 #include <vector>
 #include <linux/r_taurus_cluster_protocol.h>
-
+#include "providers/include/Renesas.h"
+#include "devices/include/TaurusOutputDevice.h"
 QT_USE_NAMESPACE
 
 const unsigned long visClientTimeout = 1000;
-struct rpmsg_endpoint_info ept_info = {"rpmsg-openamp-demo-channel", 0x2, 0x1};
-const int not_defined_value = std::numeric_limits<int>::max();
+//struct rpmsg_endpoint_info ept_info = {"rpmsg-openamp-demo-channel", 0x2, 0x1};
+/*const int not_defined_value = std::numeric_limits<int>::max();
 struct AosVisParameter {
     QString paramName;
     uint32_t ctlIOId;
@@ -53,11 +54,38 @@ const std::vector<AosVisParameter> aosVisParameters {
     {"Signal.Body.Lights.IsRearFogOn", CLUSTER_FOG_LIGHTS_BACK, not_defined_value, VisClient::getBool},
     {"Signal.Chassis.Axle.Row1.Wheel.Left.Tire.Pressure", CLUSTER_LOW_TIRE_PRESSURE, not_defined_value, VisClient::getTireStatus},
 };
+*/
 
-VisClient::VisClient(QObject *parent, const QString &url, const QString& rpmsg):QObject(parent),
-	mUrl(url),
-	mState(SubscrState::StateInit)
+std::unique_ptr<OutputDevice> make_device(const QString & deviceName, const QString& devicePath)
 {
+    if(deviceName == "taurus")
+    {
+        return std::make_unique<TaurusOutputDevice>(devicePath);
+    }
+    throw std::invalid_argument("Not supported device");
+};
+
+std::unique_ptr<VisMessageHandler> make_handler(const QString & provider, std::unique_ptr<OutputDevice> device)
+{
+    if(provider == "rensas")
+    {
+        return std::unique_ptr<VisMessageHandler>{new RenesasVisMessageHandler(std::unique_ptr<OutputDevice>(device.release()))};
+    }
+    throw std::invalid_argument("Not supported provider.");
+};
+
+VisClient::VisClient(QObject *parent,
+              const QString &url,
+              QString& provider,
+              QString& device,
+              const QString& devicePath):
+    QObject(parent),
+	mUrl(url),
+    mState(SubscrState::StateInit)
+{
+    //std::string("/dev/cluster-taurus"))))
+    visMsgHandler = make_handler(provider, make_device(device, devicePath));
+
     qDebug() << "Create VIS client";
 
     connect(&mWebSocket,
@@ -68,25 +96,10 @@ VisClient::VisClient(QObject *parent, const QString &url, const QString& rpmsg):
     connect(&mWebSocket, &QWebSocket::connected, this, &VisClient::onConnected);
     connect(&mWebSocket, &QWebSocket::disconnected, this, &VisClient::onDisconnected);
     connect(&mWebSocket, &QWebSocket::textMessageReceived, this, &VisClient::onTextMessageReceived);
-
-    mFdept = open("/dev/cluster-taurus", O_WRONLY);
-    if(mFdept < 0){
-        throw std::invalid_argument("No device /dev/cluster-taurus");
-    }
-
-    qDebug() << "Create VIS client - send 0 to reset";
-
-    qDebug() << "!!!! RESET VALUES:" << mUrl;
-    for(int i = 5; i < aosVisParameters.size();++i)
-    {
-        ioctl(mFdept, i, 0);
-    }
-    ioctl(mFdept, CLUSTER_ACTIVE, 1);
 }
 VisClient::~VisClient()
 {
     qDebug() << "Delete VIS client";
-    close(mFdept);
     mWebSocket.close();
 }
 
@@ -154,12 +167,24 @@ void VisClient::onError(QAbstractSocket::SocketError error)
     Q_EMIT VisClient::error(mWebSocket.errorString());
 }
 
+QString VisClient::getSubscriptionId(const QString &message)
+{
+    vis_string res;
+    QByteArray br = message.toUtf8();
+
+    QJsonDocument doc = QJsonDocument::fromJson(br);
+
+    QJsonObject obj = doc.object();
+    QJsonValue value = obj.value("subscriptionId");
+    res = value.toString();
+    qDebug() << " -- getSubscriptionId " << res;
+
+    return res;
+}
+
 void VisClient::onTextMessageReceived(const QString &message)
 {
     qDebug() << "Receive message:" << message;
-    // send dummy data 
-    struct taurus_cluster_data data = {0, CLUSTER_SPEED};
-    
     qDebug() << "mState: " << mState;
 
     switch(mState)
@@ -184,20 +209,11 @@ void VisClient::onTextMessageReceived(const QString &message)
             auto sId = getSubscriptionId(message);
             if(sId == mSubscriptionId)
             {
-                for (auto param : aosVisParameters)
+                auto res = visMsgHandler->handle(message);
+                if(res)
                 {
-                    auto value = param.getValue(param.paramName, message);
-                    if(value != not_defined_value)
-                    {
-                        data.value = value;
-                        data.ioctl_cmd = param.ctlIOId;
-                        write(mFdept, &data, sizeof(data));
-                    }
-                    else 
-                    {
-                        qDebug() << "Not processed parameter:" << param.paramName;
-                    }
-                }
+                    sendMessage(res->toString());
+                }                
             }
             else
             {
@@ -208,104 +224,6 @@ void VisClient::onTextMessageReceived(const QString &message)
        default:
        {
            qDebug() << "Wrong subscrition state.";
-           return;
        }
     }
-}
-
-int VisClient::getTurnDirection(const QString & propId, const QString & message)
-{
-    auto value = getStringValue("Signal.Traffic.Turn.Direction", message);
-    if(value == "right")
-    {
-       return 1;
-    }
-    else if(value == "left")
-    {
-        return 2;
-    }
-    return not_defined_value;
-}
-
-QString VisClient::getStringValue(const QString & propId, const QString & message)
-{
-    QString res;
-    QByteArray br = message.toUtf8();
-    QJsonDocument doc = QJsonDocument::fromJson(br);
-    QJsonObject obj = doc.object();
-    QJsonArray arr = obj.value("value").toArray();
-    foreach(const QJsonValue &v, arr){
-        if(v.toObject().contains(propId)) {
-           res = v.toObject().value(propId).toString();
-       }
-    }
-    return res;
-}
-
-int VisClient::getBool(const QString & propId, const QString & message)
-{
-    int res = not_defined_value;
-    QByteArray br = message.toUtf8();
-
-    QJsonDocument doc = QJsonDocument::fromJson(br);
-    if(doc["value"].isObject() && doc["value"][propId].isBool())
-    {
-        res = (int)doc["value"][propId].toBool();
-    }
-    return res;
-}
-
-int VisClient::getBeltStatus(const QString & propId, const QString & message)
-{
-    auto res = getBool(propId, message);
-    if(res != not_defined_value)
-    {
-        res = !res;
-    }
-    return res;
-}
-
-int VisClient::getTireStatus(const QString & propId, const QString & message)
-{
-    int res = not_defined_value;
-    QByteArray br = message.toUtf8();
-
-    QJsonDocument doc = QJsonDocument::fromJson(br);
-    if(doc["value"].isObject() && !doc["value"][propId].isUndefined())
-    {
-        res = doc["value"][propId].toInt();
-        res = (int)(240 >= res);
-    }
-    return res;
-}
-
-int VisClient::getValue(const QString & propId, const QString & message)
-{
-    int res = not_defined_value;
-    QByteArray br = message.toUtf8();
-    QJsonDocument doc = QJsonDocument::fromJson(br);
-    QJsonObject obj = doc.object();
-    QJsonArray arr = obj.value("value").toArray();
-    foreach(const QJsonValue &v, arr){
-        if(v.toObject().contains(propId)) {
-            res = (int)(v.toObject().value(propId).toInt());
-	        qDebug()<< propId  << " = " << res;
-       }
-    }
-    return res;
-}
-
-QString VisClient::getSubscriptionId(const QString &message)
-{
-    QString res;
-    QByteArray br = message.toUtf8();
-
-    QJsonDocument doc = QJsonDocument::fromJson(br);
-
-    QJsonObject obj = doc.object();
-    QJsonValue value = obj.value("subscriptionId");
-    res = value.toString();
-    qDebug() << " -- getSubscriptionId " << res;
-    
-    return res;
 }

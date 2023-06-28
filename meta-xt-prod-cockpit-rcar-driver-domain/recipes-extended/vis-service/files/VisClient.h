@@ -9,6 +9,8 @@
 #include <QtNetwork/QSslError>
 #include <QUuid>
 
+#include "VisServiceClient.h"
+
 enum SubscrState {
 	StateInit = 0,
 	StateGetValues = 1,
@@ -20,16 +22,13 @@ class VisClient : public QObject
 {
     Q_OBJECT
 public:
-    VisClient(QObject *parent, const QString &url, const QString& rpmsg);
+    VisClient(QObject *parent,
+              const QString &url,
+              QString& provider,
+              QString& device,
+              const QString& devicePath);
     virtual ~VisClient();
-
-    static int getBool(const QString & propId, const QString & message);
-    static int getTurnDirection(const QString & propId, const QString & message);
-    static int getValue(const QString & propId, const QString & message);
-    static int getTireStatus(const QString & propId, const QString & message);
-    static int getBeltStatus(const QString & propId, const QString & message);
-
-    static QString getStringValue(const QString & propId, const QString & message);
+    
     static QString getSubscriptionId(const QString &message);
 
     Q_INVOKABLE void connectTo();
@@ -57,6 +56,7 @@ private:
     QUuid mID;
     SubscrState mState;
     QString mSubscriptionId;
+    std::unique_ptr<VisMessageHandler> visMsgHandler;
 };    
 
 #endif // VIS_CLIENT_H
