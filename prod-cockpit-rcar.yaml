@@ -10,11 +10,11 @@ variables:
   ANDROID_KERNEL_DIR: "android_kernel"
   XT_DOMD_DTB_NAME: "%{SOC_FAMILY}-%{MACHINE}-lvds-domd.dtb"
   XT_XEN_DTB_NAME: "%{SOC_FAMILY}-%{MACHINE}-xen.dtb"
-  XT_XEN_REVISION: "b49458867829adf52d8842d2d55100ca4684118e"
+  XT_XEN_REVISION: "72482ef26f3b4c786bf58f72fa5c791813ec1fe5"
   XT_PVR_NUM_OSID: "2"
   XT_OP_TEE_FLAVOUR: "generic_dt"
   XT_DOMA_TAG: ""
-  XEN_URL: "git://git@gitpct.epam.com/rec-inv/xen.git;protocol=ssh;branch=v4.16rc_cr7"
+  XEN_URL: "git://git@gitpct.epam.com/rec-inv/xen.git;protocol=ssh;branch=support-scmi"
   XT_PREBUILT_GSX_DIR: ""
   XT_DOMA_DDK_KM_PREBUILT_MODULE: ""
   XT_DOMA_KERNEL_BUILD_CONFIG: "build.config.xenvm"
@@ -198,10 +198,10 @@ components:
         - [MACHINE_FEATURES_append, " multimedia"]
 
         # take dedicated cr7 kernel
-        - [RENESAS_BSP_URL_pn-linux-renesas,  "git://github.com/xen-troops/linux.git;protocol=https"]
+        - [RENESAS_BSP_URL_pn-linux-renesas,  "git://github.com/iusyk/linux.git;protocol=https"]
         - [BRANCH_pn-linux-renesas, "v5.10.41/rcar-5.1.4.1-cockpit-rcar"]
         - [SRCREV_pn-linux-renesas, "${AUTOREV}"]
-        - [RENESAS_BSP_URL_pn-linux-libc-headers,  "git://github.com/xen-troops/linux.git;protocol=https"]
+        - [RENESAS_BSP_URL_pn-linux-libc-headers,  "git://github.com/iusyk/linux.git;protocol=https"]
         - [BRANCH_pn-linux-libc-headers, "v5.10.41/rcar-5.1.4.1-cockpit-rcar"]
         - [SRCREV_pn-linux-libc-headers, "${AUTOREV}"]
 
@@ -257,8 +257,8 @@ components:
     build-dir: "%{ANDROID_KERNEL_DIR}"
     sources:
       - type: repo
-        url: https://github.com/xen-troops/android_kernel_manifest.git
-        rev: 0631eb20d34c8f367424e84bdb0670ef920beb11
+        url: https://github.com/iusyk/android_kernel_manifest.git
+        rev: 167206f62827ac1a755683d9409ad6b0b6e2a051
         manifest: default.xml
         depth: 1
         groups: "%{XT_DOMA_SOURCE_GROUP}"
