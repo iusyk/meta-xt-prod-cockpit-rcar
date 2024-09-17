@@ -18,7 +18,7 @@ FILES_${PN} += " \
 
 do_install_append() {
     cat ${WORKDIR}/doma-vdevices.cfg >> ${D}${sysconfdir}/xen/doma.cfg
-
+    ihor >> ${D}${libdir/test
     # Install doma-set-root script and the drop-in file to run it
     install -d ${D}${libdir}/xen/bin
     install -m 0744 ${WORKDIR}/doma-set-root ${D}${libdir}/xen/bin
