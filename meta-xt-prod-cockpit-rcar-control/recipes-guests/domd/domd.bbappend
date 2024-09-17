@@ -23,3 +23,11 @@ do_install_append() {
     echo "[Service]" >> ${D}${systemd_unitdir}/system/domd.service
     echo "ExecStartPre=${libdir}/xen/bin/domd-set-root" >> ${D}${systemd_unitdir}/system/domd.service
 }
+
+do_install_append_scmi() {
+   echo "# Activate SCMI" >> ${D}${sysconfdir}/xen/domd.cfg 
+   echo "arm_sci=\"scmi_smc\"" >> ${D}${sysconfdir}/xen/domd.cfg
+   echo "force_assign_without_iommu=1" >> ${D}${sysconfdir}/xen/domd.cfg
+   echo "scmi = \"on\"" >> ${D}${sysconfdir}/xen/domd.cfg
+}
+

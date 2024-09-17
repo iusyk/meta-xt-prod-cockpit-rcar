@@ -31,3 +31,10 @@ do_install_append() {
         install -m 0644 ${WORKDIR}/doma-pvcamera.conf ${D}${sysconfdir}/systemd/system/doma.service.d
     fi
 }
+
+do_install_append_scmi() {
+   echo "# Activate SCMI" >> ${D}${sysconfdir}/xen/doma.cfg 
+   echo "arm_sci=\"scmi_smc\"" >> ${D}${sysconfdir}/xen/doma.cfg
+   echo "force_assign_without_iommu=1" >> ${D}${sysconfdir}/xen/doma.cfg
+   echo "scmi = \"on\"" >> ${D}${sysconfdir}/xen/doma.cfg
+}
