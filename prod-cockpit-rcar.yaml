@@ -10,11 +10,11 @@ variables:
   ANDROID_KERNEL_DIR: "android_kernel"
   XT_DOMD_DTB_NAME: "%{SOC_FAMILY}-%{MACHINE}-lvds-domd.dtb"
   XT_XEN_DTB_NAME: "%{SOC_FAMILY}-%{MACHINE}-xen.dtb"
-  XT_XEN_REVISION: "b49458867829adf52d8842d2d55100ca4684118e"
+  XT_XEN_REVISION: "f7101433e007f51184df44076fb391eb368fb79c"
   XT_PVR_NUM_OSID: "2"
   XT_OP_TEE_FLAVOUR: "generic_dt"
   XT_DOMA_TAG: ""
-  XEN_URL: "git://git@gitpct.epam.com/rec-inv/xen.git;protocol=ssh;branch=v4.16rc_cr7"
+  XEN_URL: "git://git@github.com/iusyk/xen.git;protocol=ssh;branch=xen-4.19-xt0.1-cr7"
   XT_PREBUILT_GSX_DIR: ""
   XT_DOMA_DDK_KM_PREBUILT_MODULE: ""
   XT_DOMA_KERNEL_BUILD_CONFIG: "build.config.xenvm"
@@ -41,8 +41,8 @@ common_data:
       url: "https://github.com/xen-troops/meta-xt-rcar.git"
       rev: dunfell-v0.1.0
     - type: git
-      url: "https://github.com/xen-troops/meta-xt-prod-cockpit-rcar.git"
-      rev: master
+      url: "https://github.com/iusyk/meta-xt-prod-cockpit-rcar.git"
+      rev: xen-4.19
 
 
     # Common configuration options for all yocto-based domains
